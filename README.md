@@ -55,8 +55,8 @@ Location: /api/videohosting/videos/1
 
 Ответ: 200  ОК
 ```json
-    [{
+    {
         "enctype": "multipart/form-data",
         "file": "Файл видео"
-    }]
+    }
 ```
