@@ -11,7 +11,7 @@ func main() {
 	//name := flag.String("name", "Michael", "имя для приветствия")
 	//flag.Parse()
 
-	http.HandleFunc("/api/videohosting/videos", server.GetVideos)
+	http.HandleFunc("/api/videohosting/videos", server.VideosHandler)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 
