@@ -96,11 +96,12 @@ func UploadVideo(w http.ResponseWriter, r *http.Request) {
 	defer f.Close()
 	io.Copy(f, file)
 
-	w.Header().Add("Location", r.URL.String()+"/"+handler.Filename)
+	newpath := r.URL.String()[:len(r.URL.String())-7] + "/mp4/" + handler.Filename
+
+	w.Header().Add("Location", newpath)
 	w.WriteHeader(http.StatusCreated)
 
-	test := r.URL.String()[:len(r.URL.String())-7] + "/mp4/" + handler.Filename
-	fmt.Println(test)
+	fmt.Println(newpath)
 }
 
 //GetVideo возвращает файл видео
