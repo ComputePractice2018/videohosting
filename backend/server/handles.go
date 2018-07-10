@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -69,19 +70,66 @@ func UploadVideo(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(32 << 20)
 	file, handler, err := r.FormFile("uploadfile")
 	if err != nil {
-		fmt.Println(err)
+		message := fmt.Sprintf("Incorrect file: %v", err)
+		http.Error(w, message, http.StatusBadRequest)
+		log.Println(message)
+		return
+	}
+	file.Close()
+
+	err = os.MkdirAll("./mp4", 0777)
+	if err != nil {
+		message := fmt.Sprintf("Unable to create directory: %v", err)
+		http.Error(w, message, http.StatusInternalServerError)
+		log.Println(message)
 		return
 	}
 
-	defer file.Close()
-	fmt.Fprintf(w, "%v", handler.Header)
-
-	f, err := os.OpenFile("./test/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+	f, err := os.OpenFile("./mp4/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		fmt.Println(err)
+		message := fmt.Sprintf("Unable to opent file: %v", err)
+		http.Error(w, message, http.StatusBadRequest)
+		log.Println(message)
 		return
 	}
 
 	defer f.Close()
 	io.Copy(f, file)
+
+	w.Header().Add("Location", r.URL.String()+"/"+handler.Filename)
+	w.WriteHeader(http.StatusCreated)
+
+	test := r.URL.String()[:len(r.URL.String())-7] + "/mp4/" + handler.Filename
+	fmt.Println(test)
+}
+
+//GetVideo возвращает файл видео
+func GetVideo(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	name := vars["name"]
+
+	w.Header().Add("Content-Type", "video/mp4; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+
+	binvid, err := ioutil.ReadFile("./mp4/" + name)
+
+	if err != nil {
+		message := fmt.Sprintf("Unable to read file: %v", err)
+		http.Error(w, message, http.StatusInternalServerError)
+		log.Println(message)
+		return
+	}
+
+	fmt.Println(len(binvid))
+
+	_, err = w.Write(binvid)
+
+	if err != nil {
+		message := fmt.Sprintf("Unable to write file: %v", err)
+		http.Error(w, message, http.StatusInternalServerError)
+		log.Println(message)
+		return
+	}
+
 }

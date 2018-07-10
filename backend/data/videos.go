@@ -11,7 +11,7 @@ type Video struct {
 	Link        string `json:"link"`
 }
 
-//videoList хранит список видео
+//videos хранит список видео
 var videos []Video
 
 //GetVideos возвращает список видео

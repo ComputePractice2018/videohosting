@@ -19,6 +19,7 @@ func main() {
 	router.HandleFunc("/api/videohosting/videos/{id}", server.DeleteVideo).Methods("DELETE")
 
 	router.HandleFunc("/api/videohosting/upload", server.UploadVideo).Methods("POST")
+	router.HandleFunc("/api/videohosting/videos/mp4/{name}", server.GetVideo).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

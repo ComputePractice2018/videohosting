@@ -37,26 +37,16 @@ Location: /api/videohosting/videos/1
 
 Ответ: 204  No content
 
-### POST /api/videohosting/videos
+### POST /api/videohosting/upload
 
-Тело запроса:
+Тело запроса: содержание файла example.mp4
+Enctype: multipart/form-data
 
-```json
-    {
-        "enctype": "multipart/form-data",
-        "file": "Загружаемый файл"
-    }
-```
+Ответ: 201 Created
+Location: /api/videohosting/videos/mp4/example.mp4
 
-Ответ: 206 Partial Content
-Location: /api/videohosting/videos/1
-
-### GET /api/videohosting/videos/1
+### GET /api/videohosting/videos/mp4/example.mp4
 
 Ответ: 200  ОК
-```json
-    {
-        "enctype": "multipart/form-data",
-        "file": "Файл видео"
-    }
-```
+Content-Type: video/mp4
+Тело ответа: соддержание файла example.mp4
