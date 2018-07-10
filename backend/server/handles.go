@@ -3,27 +3,13 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/ComputePractice2018/videohosting/backend/data"
 )
-
-//VideosHandler обрабатывает все запросы к /api/videohosting/videos
-func VideosHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		GetVideos(w, r)
-		return
-	}
-	if r.Method == "POST" {
-		AddVideo(w, r)
-		return
-	}
-
-	message := fmt.Sprintf("Method %s is not allowed", r.Method)
-	http.Error(w, message, http.StatusInternalServerError)
-	log.Println(message)
-}
 
 //GetVideos обрабатывает запросы на получение списка
 func GetVideos(w http.ResponseWriter, r *http.Request) {
@@ -60,4 +46,31 @@ func AddVideo(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("%+v", video)
 	w.WriteHeader(http.StatusCreated)
+}
+
+// DeleteVideo обрабатывает DELETE запрос
+func DeleteVideo(w http.ResponseWriter, r *http.Request) {
+
+}
+
+//UploadVideo обрабатывает POST запрос на загрузку файла
+func UploadVideo(w http.ResponseWriter, r *http.Request) {
+	r.ParseMultipartForm(32 << 20)
+	file, handler, err := r.FormFile("uploadfile")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer file.Close()
+	fmt.Fprintf(w, "%v", handler.Header)
+
+	f, err := os.OpenFile("./test/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer f.Close()
+	io.Copy(f, file)
 }
