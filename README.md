@@ -36,3 +36,27 @@ Location: /api/videohosting/videos/1
 ### DELETE /api/videohosting/videos/1
 
 Ответ: 204  No content
+
+### POST /api/videohosting/videos
+
+Тело запроса:
+
+```json
+    {
+        "enctype": "multipart/form-data",
+        "file": "Загружаемый файл"
+    }
+```
+
+Ответ: 206 Partial Content
+Location: /api/videohosting/videos/1
+
+### GET /api/videohosting/videos/1
+
+Ответ: 200  ОК
+```json
+    {
+        "enctype": "multipart/form-data",
+        "file": "Файл видео"
+    }
+```
