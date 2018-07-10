@@ -7,31 +7,24 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+
+	"github.com/gorilla/mux"
 
 	"github.com/ComputePractice2018/videohosting/backend/data"
 )
 
 //GetVideos обрабатывает запросы на получение списка
 func GetVideos(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Request method: %s", r.Method)
-	binaryData, err := json.Marshal(data.VideoList)
+	w.Header().Add("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	err := json.NewEncoder(w).Encode(data.GetVideos())
 	if err != nil {
-		message := fmt.Sprintf("JSON marshaling error: %v", err)
+		message := fmt.Sprintf("Unable to encode POST data: %v", err)
 		http.Error(w, message, http.StatusInternalServerError)
 		log.Println(message)
 		return
 	}
-
-	w.Header().Add("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-
-	_, err = w.Write(binaryData)
-	if err != nil {
-		message := fmt.Sprintf("Handler write error: %v", err)
-		http.Error(w, message, http.StatusInternalServerError)
-		log.Println(message)
-	}
-	return
 }
 
 // AddVideo обрабатывает POST запрос
@@ -44,13 +37,31 @@ func AddVideo(w http.ResponseWriter, r *http.Request) {
 		log.Println(message)
 		return
 	}
-	log.Printf("%+v", video)
+	id := data.AddVideo(video)
+	w.Header().Add("Location", r.URL.String()+"/"+strconv.Itoa(id))
 	w.WriteHeader(http.StatusCreated)
 }
 
 // DeleteVideo обрабатывает DELETE запрос
 func DeleteVideo(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		message := fmt.Sprintf("Incorrect ID: %v", err)
+		http.Error(w, message, http.StatusBadRequest)
+		log.Println(message)
+		return
+	}
 
+	err = data.DeleteVideo(id)
+	if err != nil {
+		message := fmt.Sprintf("Incorrect ID: %v", err)
+		http.Error(w, message, http.StatusBadRequest)
+		log.Println(message)
+		return
+	}
+	w.Header().Add("Location", r.URL.String())
+	w.WriteHeader(http.StatusNoContent)
 }
 
 //UploadVideo обрабатывает POST запрос на загрузку файла
