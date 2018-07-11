@@ -16,53 +16,59 @@ import (
 )
 
 //GetVideos обрабатывает запросы на получение списка
-func GetVideos(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	err := json.NewEncoder(w).Encode(data.GetVideos())
-	if err != nil {
-		message := fmt.Sprintf("Unable to encode POST data: %v", err)
-		http.Error(w, message, http.StatusInternalServerError)
-		log.Println(message)
-		return
+func GetVideos(cl data.Editable) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		err := json.NewEncoder(w).Encode(cl.GetVideos())
+		if err != nil {
+			message := fmt.Sprintf("Unable to encode POST data: %v", err)
+			http.Error(w, message, http.StatusInternalServerError)
+			log.Println(message)
+			return
+		}
 	}
 }
 
 // AddVideo обрабатывает POST запрос
-func AddVideo(w http.ResponseWriter, r *http.Request) {
-	var video data.Video
-	err := json.NewDecoder(r.Body).Decode(&video)
-	if err != nil {
-		message := fmt.Sprintf("Unable to decode POST data: %v", err)
-		http.Error(w, message, http.StatusUnsupportedMediaType)
-		log.Println(message)
-		return
+func AddVideo(cl data.Editable) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var video data.Video
+		err := json.NewDecoder(r.Body).Decode(&video)
+		if err != nil {
+			message := fmt.Sprintf("Unable to decode POST data: %v", err)
+			http.Error(w, message, http.StatusUnsupportedMediaType)
+			log.Println(message)
+			return
+		}
+		id := cl.AddVideo(video)
+		w.Header().Add("Location", r.URL.String()+"/"+strconv.Itoa(id))
+		w.WriteHeader(http.StatusCreated)
 	}
-	id := data.AddVideo(video)
-	w.Header().Add("Location", r.URL.String()+"/"+strconv.Itoa(id))
-	w.WriteHeader(http.StatusCreated)
 }
 
 // DeleteVideo обрабатывает DELETE запрос
-func DeleteVideo(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		message := fmt.Sprintf("Incorrect ID: %v", err)
-		http.Error(w, message, http.StatusBadRequest)
-		log.Println(message)
-		return
-	}
+func DeleteVideo(cl data.Editable) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id, err := strconv.Atoi(vars["id"])
+		if err != nil {
+			message := fmt.Sprintf("Incorrect ID: %v", err)
+			http.Error(w, message, http.StatusBadRequest)
+			log.Println(message)
+			return
+		}
 
-	err = data.DeleteVideo(id)
-	if err != nil {
-		message := fmt.Sprintf("Incorrect ID: %v", err)
-		http.Error(w, message, http.StatusBadRequest)
-		log.Println(message)
-		return
+		err = cl.DeleteVideo(id)
+		if err != nil {
+			message := fmt.Sprintf("Incorrect ID: %v", err)
+			http.Error(w, message, http.StatusBadRequest)
+			log.Println(message)
+			return
+		}
+		w.Header().Add("Location", r.URL.String())
+		w.WriteHeader(http.StatusNoContent)
 	}
-	w.Header().Add("Location", r.URL.String())
-	w.WriteHeader(http.StatusNoContent)
 }
 
 //UploadVideo обрабатывает POST запрос на загрузку файла
