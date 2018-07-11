@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// NewRouter отвечает возвращение роутера, обрабатывающего запросы к серверу
 func NewRouter(videolist data.Editable) *mux.Router {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/videohosting/videos", GetVideos(videolist)).Methods("GET")
