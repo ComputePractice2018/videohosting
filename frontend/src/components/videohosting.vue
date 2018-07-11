@@ -2,6 +2,8 @@
   <div class="videohosting">
     <h1>{{ title }}</h1>
 
+    <h3 v-if="error">Ошибка: {{error}}</h3>
+
      <table>
       <tr>
         <th>Название</th>
@@ -23,12 +25,14 @@
        <p>Описание:<input type="text" v-model="new_video.description"></p>
        <p>Ссылка на видео:<input type="text" v-model="new_video.link"></p>
        <button v-if="edit_index == -1" v-on:click="add_new_video">Добавить видеофайл</button>
-       <button v-if="edit_index > -1" v-on:click="make_new_video">Сохранить изменения</button>
+       <button v-if="edit_index > -1" v-on:click="end_of_edition">Сохранить изменения</button>
      </form>
   </div>
 </template>
 
 <script>
+const axios = require('axios')
+
 export default {
   name: 'videohosting',
   props: {
@@ -37,18 +41,8 @@ export default {
   data: function () {
     return {
       edit_index: -1,
-      video_list: [
-        {
-          'title': 'little cat',
-          'description': 'Это видео о котятах',
-          'link': 'Ссылка на видео'
-        },
-        {
-          'title': 'Hазвание',
-          'description': 'Описание',
-          'link': 'Ссылка на видео'
-        }
-      ],
+      error: '',
+      video_list: [],
       new_video:
        {
          'title': '',
@@ -57,24 +51,54 @@ export default {
        }
     }
   },
+  mounted: function () {
+    this.get_videos()
+  },
   methods: {
+    get_videos: function () {
+      this.error = ''
+      const url = '/api/videohosting/videos'
+      axios.get(url).then(response => {
+        this.video_list = response.data
+      }).catch(response => {
+        this.error = response.response.data
+      })
+    },
     add_new_video: function () {
-      this.video_list.push(this.new_video)
+      this.error = ''
+      const url = '/api/videohosting/videos'
+      axios.post(url, this.new_video).then(response => {
+        this.video_list.push(this.new_video)
+      }).catch(response => {
+        this.error = response.response.data
+      })
     },
     remove_video: function (item) {
-      this.video_list.splice(this.video_list.indexOf(item), 1)
+      this.error = ''
+      const url = '/api/videohosting/videos' + this.video_list.indexOf(item)
+      axios.delete(url).then(response => {
+        this.video_list.splice(this.video_list.indexOf(item), 1)
+      }).catch(response => {
+        this.error = response.response.data
+      })
     },
     edit_video: function (item) {
       this.edit_index = this.video_list.indexOf(item)
       this.new_video = this.video_list[this.edit_index]
     },
-    make_new_video: function () {
-      this.edit_index = -1
-      this.new_video = {
-        'title': '',
-        'description': '',
-        'link': ''
-      }
+    end_of_edition: function () {
+      this.error = ''
+      const url = '/api/videohosting/videos' + this.edit_index
+      axios.put(url, this.new_video).then(response => {
+        this.edit_index = -1
+        this.new_video = {
+          'title': '',
+          'description': '',
+          'link': ''
+        }
+      }).catch(response => {
+        this.error = response.response.data
+      })
     }
   }
 }
