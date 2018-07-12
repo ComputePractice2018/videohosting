@@ -6,6 +6,7 @@ import (
 
 //Video структура для хранения данных о видео-файле
 type Video struct {
+	ID          int    `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Link        string `json:"link"`
@@ -35,16 +36,18 @@ func (cl *VideoList) GetVideos() []Video {
 
 // AddVideo добавляет видео video в конец списка и возвращает id
 func (cl *VideoList) AddVideo(video Video) int {
-	id := len(cl.videos)
+	id := len(cl.videos) + 1
+	video.ID = id
 	cl.videos = append(cl.videos, video)
 	return id
 }
 
 // DeleteVideo удаляет видео по id
 func (cl *VideoList) DeleteVideo(id int) error {
-	if id < 0 || id >= len(cl.videos) {
+	if id < 1 || id > len(cl.videos) {
 		return fmt.Errorf("Incorrect ID")
 	}
+	id--
 	cl.videos = append(cl.videos[:id], cl.videos[id+1:]...)
 	return nil
 }
