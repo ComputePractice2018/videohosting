@@ -11,26 +11,40 @@ type Video struct {
 	Link        string `json:"link"`
 }
 
-//videos хранит список видео
-var videos []Video
-
-//GetVideos возвращает список видео
-func GetVideos() []Video {
-	return videos
+// VideoList структура для списка записей о видео-файлах
+type VideoList struct {
+	videos []Video
 }
 
-//AddVideo добавляет видео video в конец списка и возвращает id
-func AddVideo(video Video) int {
-	id := len(videos)
-	videos = append(videos, video)
+// Editable интерфейс для работы со списком записей
+type Editable interface {
+	GetVideos() []Video
+	AddVideo(video Video) int
+	DeleteVideo(id int) error
+}
+
+// NewVideoList конструктор списка записей
+func NewVideoList() *VideoList {
+	return &VideoList{}
+}
+
+// GetVideos возвращает список видео
+func (cl *VideoList) GetVideos() []Video {
+	return cl.videos
+}
+
+// AddVideo добавляет видео video в конец списка и возвращает id
+func (cl *VideoList) AddVideo(video Video) int {
+	id := len(cl.videos)
+	cl.videos = append(cl.videos, video)
 	return id
 }
 
-//DeleteVideo удаляет видео по id
-func DeleteVideo(id int) error {
-	if id < 0 || id >= len(videos) {
+// DeleteVideo удаляет видео по id
+func (cl *VideoList) DeleteVideo(id int) error {
+	if id < 0 || id >= len(cl.videos) {
 		return fmt.Errorf("Incorrect ID")
 	}
-	videos = append(videos[:id], videos[id+1:]...)
+	cl.videos = append(cl.videos[:id], cl.videos[id+1:]...)
 	return nil
 }
