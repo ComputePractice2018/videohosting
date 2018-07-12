@@ -47,7 +47,7 @@ func TestCrdHandlers(t *testing.T) {
 	if resp.StatusCode != http.StatusCreated {
 		t.Errorf("Expected 201 code (gotten: %d)", resp.StatusCode)
 	}
-	if resp.Header.Get("Location") != "/api/videohosting/videos/0" {
+	if resp.Header.Get("Location") != "/api/videohosting/videos/1" {
 		t.Error("Expected another location")
 	}
 
@@ -55,7 +55,7 @@ func TestCrdHandlers(t *testing.T) {
 		t.Error("Expected new value")
 	}
 
-	req, err = http.NewRequest("DELETE", "/api/videohosting/videos/0", nil)
+	req, err = http.NewRequest("DELETE", "/api/videohosting/videos/1", nil)
 
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
