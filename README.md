@@ -57,6 +57,7 @@ Backend:
 
 '''bat
 cd backend
+
 docker build -f Dockerfile -t videohostingbackend:<имя ветки> .
 docker run -rm --name videohostingbackend -e NAME=<параметр приложения> videohostingbackend:<имя ветки>
 '''
