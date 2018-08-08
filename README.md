@@ -50,3 +50,13 @@ Location: /api/videohosting/videos/mp4/example.mp4
 Ответ: 200  ОК
 Content-Type: video/mp4
 Тело ответа: соддержание файла example.mp4
+
+## Как собрать и запустить
+
+Backend:
+
+'''bat
+cd backend
+docker build -f Dockerfile -t videohosting:<имя ветки> .
+docker run --rm --name videohosting -e NAME=<параметр приложения> videohosting:<имя ветки>
+'''
