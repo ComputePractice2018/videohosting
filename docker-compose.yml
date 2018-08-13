@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  backend:
+    depends_on:
+      - db
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      CONNECTION: videohosting:SuperSecretPassword@tcp(db:3306)/videohosting
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
+  
+  proxy:
+    depends_on:
+      - backend
+      - frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "80:80"
+
+  db:
+     image: mysql:latest
+     restart: always
+     environment:
+       MYSQL_RANDOM_ROOT_PASSWORD: "yes" 
+       MYSQL_DATABASE: videohosting
+       MYSQL_USER: videohosting
+       MYSQL_PASSWORD: SuperSecretPassword
